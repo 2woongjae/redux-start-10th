@@ -1,27 +1,36 @@
 import React from "react";
 import logo from "./logo.svg";
 import "./App.css";
-import { addTodo, completeTodo } from "./actioins";
+import { completeTodo } from "./actioins";
+import ReduxContext from "./contexts/ReduxContext";
+import TodoForm from "./components/TodoForm";
 
 class App extends React.Component {
-  inputRef = React.createRef();
-  click = () => {
-    const text = this.inputRef.current.value;
-    console.log(text);
-    this.props.store.dispatch(addTodo(text));
-  };
+  static contextType = ReduxContext;
+
+  state = this.context.getState();
+
+  unsubscribe;
+
+  componentDidMount() {
+    this.unsubscribe = this.context.subscribe(() => {
+      const state = this.context.getState();
+      this.setState(state);
+    });
+  }
+
+  componentWillUnmount() {
+    this.unsubscribe();
+  }
 
   render() {
-    const todos = this.props.store.getState().todos;
+    const { todos } = this.state;
     console.log(todos);
     return (
       <div className="App">
         <header className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            <input ref={this.inputRef} />
-            <button onClick={this.click}>add</button>
-          </p>
+          <TodoForm />
           <ul>
             {todos.map((todo, index) => (
               <div key={index}>
@@ -33,7 +42,7 @@ class App extends React.Component {
                     <button
                       onClick={() => {
                         console.log(index);
-                        this.props.store.dispatch(completeTodo(index));
+                        this.context.dispatch(completeTodo(index));
                       }}
                     >
                       끝!
