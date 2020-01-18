@@ -2,30 +2,12 @@ import React from "react";
 import logo from "./logo.svg";
 import "./App.css";
 import { completeTodo } from "./actioins";
-import ReduxContext from "./contexts/ReduxContext";
 import TodoForm from "./components/TodoForm";
+import { connect } from "react-redux";
 
 class App extends React.Component {
-  static contextType = ReduxContext;
-
-  state = this.context.getState();
-
-  unsubscribe;
-
-  componentDidMount() {
-    this.unsubscribe = this.context.subscribe(() => {
-      const state = this.context.getState();
-      this.setState(state);
-    });
-  }
-
-  componentWillUnmount() {
-    this.unsubscribe();
-  }
-
   render() {
-    const { todos } = this.state;
-    console.log(todos);
+    const { todos, completeTodo } = this.props;
     return (
       <div className="App">
         <header className="App-header">
@@ -42,7 +24,7 @@ class App extends React.Component {
                     <button
                       onClick={() => {
                         console.log(index);
-                        this.context.dispatch(completeTodo(index));
+                        completeTodo(index);
                       }}
                     >
                       끝!
@@ -58,4 +40,14 @@ class App extends React.Component {
   }
 }
 
-export default App;
+const mapStateToProps = state => ({
+  todos: state.todos
+});
+
+const mapDispatchToProps = dispatch => ({
+  completeTodo: index => {
+    dispatch(completeTodo(index));
+  }
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);
